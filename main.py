@@ -2,8 +2,10 @@ import argparse
 import os
 
 from task_gen.dag_gen import Task, DAGGen
+from task_gen.dag_file import DAGFile
 from sched.classic import ClassicBound
 from sched.cpc_based import CPCBound
+from sched.naive import NaiveBound
 
 BATCH_SIZE = 1
 
@@ -14,20 +16,20 @@ if __name__ == "__main__":
     for i in range(BATCH_SIZE):
         # Generate Graph for one DAG
         dag_param_1 = {
-            "task_num" : [20, 0],
-            "depth" : [5.0, 1.0],
+            "node_num" : [20, 0],
+            "depth" : [10.0, 1.0],
             "exec_t" : [50.0, 30.0],
             "start_node" : [1, 0],
-            "extra_arc_ratio" : 0.2
+            "end_node" : [1, 0],
+            "extra_arc_ratio" : 0.5
         }
 
         Task.idx = 0
         DAG = DAGGen(**dag_param_1)
+        # DAG = DAGFile('./input1.txt')
 
-        # TODO : Implement class bound algorithm
-        classic = ClassicBound(DAG.task_set)
-        classic_bound = classic.calculate_bound()        
-
+        classic = ClassicBound(DAG.task_set, core_num=4)
+        naive = NaiveBound(DAG.task_set, core_num=4)
         print(DAG)
         print(classic_bound)
 
@@ -43,3 +45,9 @@ if __name__ == "__main__":
         CPC_DAG = DAGGen(**dag_param_cpc)
         cpc_model = CPCBound(CPC_DAG, 2)
         print(cpc_model.task_set)
+
+        classic_bound = classic.calculate_bound()
+        naive_bound = naive.calculate_bound()
+        
+        print("classic bound: ", classic_bound)
+        print("naive bound: ", naive_bound)
